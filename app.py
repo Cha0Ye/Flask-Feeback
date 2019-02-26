@@ -1,7 +1,6 @@
 from flask import Flask, request, redirect, render_template, session
 from models import db, connect_db, User
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_bcrypt import Bcrypt
 from flask_wtf import FlaskForm
 from forms import RegistrationForm, LoginForm
 from flask_sqlalchemy import SQLAlchemy
@@ -30,29 +29,46 @@ def redirect_to_register():
 
 
 #register directory
-@app.route('/register', methods =["GET","POST"])
+@app.route('/register', methods =["GET", "POST"])
 def show_register_form():
     '''display registration form and handle new user registration'''
     form = RegistrationForm()
+
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
+        new_user = User.register(username, password)
+        db.session.add(new_user)
+        db.session.commit()
         return redirect('/secret')
     else:
-        return render_template('registration_form.html',form=form)
+        return render_template('registration_form.html', form=form)
 
 
 #login
 @app.route('/login', methods =["GET","POST"])
-def show_register_form():
+def show_login_form():
     '''display login form and handle user login'''
+
     form = LoginForm()
+
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        return redirect('/secret')
+        current_user = User.authenticate(username, password)
+        if current_user:
+            session["user_id"] = current_user.username
+            return redirect('/secret')
+        else:
+            form.username.errors = ["Bad name/password"]
     else:
-        return render_template('registration_form.html',form=form)
+        return render_template('login_form.html', form=form)
+
+
+@app.route('/secret')
+def show_secret():
+    ''' View function for secret '''
+    return '<h1>You made it!</h1>'
 
 
 

@@ -4,6 +4,11 @@ from sqlalchemy.orm import backref
 
 db = SQLAlchemy()
 
+def connect_db(app):
+    '''connect to db'''
+    db.app = app
+    db.init_app(app)
+
 
 class User(db.Model):
     '''user class'''
@@ -21,5 +26,5 @@ class User(db.Model):
     first_name = db.Column(db.String(30),
                            nullable=False)
 
-    last_name = db.Column(db.String(30),
+    _name = db.Column(db.String(30),
                            nullable=False)

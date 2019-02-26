@@ -3,7 +3,7 @@ from models import db, connect_db, User
 from flask_debugtoolbar import DebugToolbarExtension
 
 from flask_wtf import FlaskForm
-#from forms import AddNewPetForm, EditPetForm
+from forms import RegistrationForm
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -20,5 +20,28 @@ debug = DebugToolbarExtension(app)
 connect_db(app)
 db.create_all()
 
-user = User()
+
+
+#root directory
+@app.route('/')
+def redirect_to_register():
+    '''redirect user to register a new account'''
+    return redirect('/register')
+
+
+#register directory
+@app.route('/register', methods =["GET","POST"])
+def show_register_form():
+    '''display registration form and handle new user registration'''
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+        return redirect('secret')
+
+    else:
+        return render_template('registration_form.html',form=form)
+
+
+
 

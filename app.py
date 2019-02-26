@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, session
+from flask import Flask, request, redirect, render_template, session, flash
 from models import db, connect_db, User
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_wtf import FlaskForm
@@ -65,10 +65,15 @@ def show_login_form():
         return render_template('login_form.html', form=form)
 
 
-@app.route('/secret')
-def show_secret():
-    ''' View function for secret '''
-    return '<h1>You made it!</h1>'
+@app.route("/secret")
+def secret():
+    """Example hidden page for logged-in users only."""
+
+    if "user_id" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/")
+    else:
+        return render_template("secret.html")
 
 
 

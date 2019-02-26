@@ -46,7 +46,7 @@ def show_register_form():
 
 
 #login
-@app.route('/login', methods =["GET","POST"])
+@app.route('/login', methods =['GET','POST'])
 def show_login_form():
     '''display login form and handle user login'''
 
@@ -57,23 +57,32 @@ def show_login_form():
         password = form.password.data
         current_user = User.authenticate(username, password)
         if current_user:
-            session["user_id"] = current_user.username
+            session['user_id'] = current_user.username
             return redirect('/secret')
         else:
-            form.username.errors = ["Bad name/password"]
+            form.username.errors = ['Bad name/password']
     else:
         return render_template('login_form.html', form=form)
 
 
 @app.route("/secret")
 def secret():
-    """Example hidden page for logged-in users only."""
+    '''Example hidden page for logged-in users only.'''
 
-    if "user_id" not in session:
-        flash("You must be logged in to view!")
+    if 'user_id' not in session:
+        flash('You must be logged in to view!')
         return redirect("/")
     else:
-        return render_template("secret.html")
+        return render_template('secret.html')
+
+
+#logout
+@app.route('/logout', methods =['POST'])
+def logout_user():
+    ''' Log user out'''
+    session.pop('user_id')
+    return redirect('/')
+    
 
 
 

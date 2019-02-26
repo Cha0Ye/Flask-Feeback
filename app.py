@@ -58,22 +58,22 @@ def show_login_form():
         current_user = User.authenticate(username, password)
         if current_user:
             session['user_id'] = current_user.username
-            return redirect('/secret')
+            return redirect(f'/users/{username}')
         else:
             form.username.errors = ['Bad name/password']
     else:
         return render_template('login_form.html', form=form)
 
 
-@app.route("/secret")
-def secret():
-    '''Example hidden page for logged-in users only.'''
+@app.route("/users/<username>")
+def display_user_info(username):
+    '''Display user information on login.'''
 
     if 'user_id' not in session:
         flash('You must be logged in to view!')
         return redirect("/")
     else:
-        return render_template('secret.html')
+        return render_template('secret.html',username=username)
 
 
 #logout

@@ -2,7 +2,7 @@ from flask import Flask, request, redirect, render_template, session, flash
 from models import db, connect_db, User, FeedBack
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_wtf import FlaskForm
-from forms import RegistrationForm, LoginForm, AddFeedback
+from forms import RegistrationForm, LoginForm, AddFeedback, UpdateFeedback
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -40,7 +40,8 @@ def show_register_form():
         new_user = User.register(username, password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect('/secret')
+        session['user_id']=username
+        return redirect(f"/users/{username}")
     else:
         return render_template('registration_form.html', form=form)
 
@@ -90,17 +91,67 @@ def logout_user():
 @app.route('/users/<username>/feedback/add', methods=['GET','POST'])
 def add_feedback(username):
     ''' add feedback from user'''
+    if 'user_id' not in session:
+        flash('You must be logged in to view!')
+        return redirect("/")
+
     form = AddFeedback()
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        new_feedback = FeedBack(title=title, content=content, username=username)
+        db.session.add(new_feedback)
+        db.session.commit()
+
+        return redirect(f'/users/{username}')
+    else:
+        return render_template('add_feedback.html', username=username, form=form)
+
+
+@app.route('/users/<username>/delete')
+def delete_user(username):
+    '''Delete user'''
+    if 'user_id' not in session or session['user_id'] != username:
+        flash('You are not authorized to view!')
+        return redirect("/")
+    user = User.query.get(username)
+    user_posts = user.feedback_items
+    for row in user_posts:
+        db.session.delete(row)
+    db.session.delete(user)
+    db.session.commit()
+    session.pop('user_id')
+    return redirect('/')
+
+@app.route('/feedback/<int:feedback_id>/update', methods=['GET','POST'])
+def update_feedback(feedback_id):
+    ''' Render and process form for updating feedback'''
+    if 'user_id' not in session:
+        flash('You are not authorized to view!')
+        return redirect("/")
+
+    feedback = FeedBack.query.get(feedback_id)
+    user = feedback.user
+    form = UpdateFeedback(obj=feedback)
     
+    if form.validate_on_submit():
+        feedback.title=form.title.data
+        feedback.content=form.content.data
+        db.session.commit()
 
-    return render_template('add_feedback.html', form=form)
-
-
-# @app.route('/feedback/<int:feedback_id>/update', methods=['GET','POST'])
-# def update_feedback(feedback_id):
-    ''' '''
-    
-
-
+        return redirect(f'/users/{user.username}')
+    else:
+        return render_template('edit_feedback_form.html', feedback_id=feedback_id, form=form)
 
 
+@app.route('/feedback/<int:feedback_id>/delete')
+def delete_feedback(feedback_id):
+    '''Delete feedback'''
+    if 'user_id' not in session:
+        flash('You are not authorized to view!')
+        return redirect("/")
+    feedback = FeedBack.query.get(feedback_id)
+    user = feedback.user
+    db.session.delete(feedback)
+    db.session.commit()
+    return redirect(f'/users/{user.username}')

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block title %} 
-Add Feedback
+Update Feedback
 {% endblock %}
 
 {% block content %}
-<form action='/users/{{ username }}/feedback/add' method="POST">
-    <h2>Feedback</h2>
+<form action='/feedback/{{ feedback_id }}/update' method="POST">
+    <h2>Edit Feedback</h2>
         {{ form.hidden_tag() }}
       
         {% for field in form
@@ -21,7 +21,7 @@ Add Feedback
           </p>
         {% endfor %}
       
-        <button type="submit">Add</button>
+        <button type="submit">Edit</button>
       
 </form>
 {% endblock %}

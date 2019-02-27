@@ -28,3 +28,11 @@ class AddFeedback(FlaskForm):
     content = TextAreaField('Content: ', 
                              validators=[InputRequired()])
 
+class UpdateFeedback(FlaskForm):
+    ''' Form to add feedback given we know who the user is'''
+
+    title = StringField('Title: ',
+                         validators=[InputRequired()])
+
+    content = TextAreaField('Content: ', 
+                             validators=[InputRequired()])

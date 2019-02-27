@@ -1,8 +1,8 @@
 from flask import Flask, request, redirect, render_template, session, flash
-from models import db, connect_db, User
+from models import db, connect_db, User, FeedBack
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_wtf import FlaskForm
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, AddFeedback
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -73,7 +73,9 @@ def display_user_info(username):
         flash('You must be logged in to view!')
         return redirect("/")
     else:
-        return render_template('secret.html',username=username)
+        user = User.query.get(username)
+        feedback = user.feedback_items
+        return render_template('secret.html',username=username, feedback=feedback)
 
 
 #logout
@@ -82,6 +84,21 @@ def logout_user():
     ''' Log user out'''
     session.pop('user_id')
     return redirect('/')
+
+
+#add feedback
+@app.route('/users/<username>/feedback/add', methods=['GET','POST'])
+def add_feedback(username):
+    ''' add feedback from user'''
+    form = AddFeedback()
+    
+
+    return render_template('add_feedback.html', form=form)
+
+
+# @app.route('/feedback/<int:feedback_id>/update', methods=['GET','POST'])
+# def update_feedback(feedback_id):
+    ''' '''
     
 
 
